@@ -519,20 +519,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('f-ospiti').value = '';
     document.getElementById('f-partecipazione').selectedIndex = 0;
     document.querySelectorAll('input[name="navetta"]').forEach(r => r.checked = false);
-    document.getElementById('f-navetta-n').value = '0';
     document.querySelectorAll('#intol-grid input[type="checkbox"]').forEach(c => c.checked = false);
     const noteMenu = document.getElementById('f-note-menu');
     if (noteMenu) noteMenu.value = '';
     document.getElementById('f-messaggio').value = '';
     numOspitiExtra = 0;
     aggiornaOspitiExtra('');
-    document.getElementById('extra-nomi-wrap').innerHTML = '';
-    document.querySelectorAll('[id^="navetta-row-extra-"]').forEach(el => el.remove());
-    document.querySelectorAll('[id^="menu-block-extra-"]').forEach(el => el.remove());
-  }
-
-  function resetSezioneNavetta() {
-    document.getElementById('f-navetta-n').value = '0';
   }
 
   function aggiornaSezionPresenza(val) {
@@ -545,19 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
       rowOspiti.style.opacity       = disabilitare ? '.4' : '1';
       rowOspiti.style.pointerEvents = disabilitare ? 'none' : '';
     }
-    if (disabilitare) {
-      resetSezionePresenza();
-      aggiornaSezionNavetta('no');
-    }
-  }
-
-  function aggiornaSezionNavetta(val) {
-    const rowNavN = document.getElementById('f-navetta-n')?.closest('.form-row');
-    if (rowNavN) {
-      rowNavN.style.opacity       = val === 'si' ? '1' : '.4';
-      rowNavN.style.pointerEvents = val === 'si' ? '' : 'none';
-    }
-    if (val === 'no') resetSezioneNavetta();
+    if (disabilitare) resetSezionePresenza();
   }
 
   // Listener ospiti extra
@@ -570,19 +550,14 @@ document.addEventListener('DOMContentLoaded', () => {
     r.addEventListener('change', e => aggiornaSezionPresenza(e.target.value));
   });
 
-  // Listener navetta
-  document.querySelectorAll('input[name="navetta"]').forEach(r => {
-    r.addEventListener('change', e => aggiornaSezionNavetta(e.target.value));
-  });
+  // Listener navetta (nessuna logica di abilitazione necessaria con nuovo layout)
 
-  // Stato iniziale: tutto disabilitato tranne dati personali e partecipazione
+  // Stato iniziale: navetta e menu disabilitati finché non si conferma la presenza
   ['card-navetta','card-menu','card-messaggio'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('disabled');
   });
   if (rowOspiti) { rowOspiti.style.opacity = '.4'; rowOspiti.style.pointerEvents = 'none'; }
-  // Navetta-n disabilitata di default (nessuna selezione)
-  aggiornaSezionNavetta('no');
 });
 
 // COUNTDOWN
@@ -822,7 +797,7 @@ async function submitForm(e){
   const tel           = document.getElementById("f-tel").value.trim();
   const ospiti        = document.getElementById("f-ospiti").value.trim();
   const partecipazione= document.getElementById("f-partecipazione").value;
-  const navetta_n     = document.getElementById("f-navetta-n")?.value.trim() || "";
+  const navetta_n     = ""; // campo rimosso, calcolato lato sheet se necessario
   const note_menu     = document.getElementById("f-note-menu")?.value?.trim() || "";
   const messaggio     = document.getElementById("f-messaggio")?.value.trim() || "";
   const ospitiExtra   = raccogliOspitiExtra();
@@ -956,8 +931,7 @@ function resetForm(){
   });
   const rowOspiti = document.querySelector('#f-ospiti')?.closest('.form-row');
   if (rowOspiti) { rowOspiti.style.opacity='.4'; rowOspiti.style.pointerEvents='none'; }
-  const rowNavN = document.getElementById('f-navetta-n')?.closest('.form-row');
-  if (rowNavN) { rowNavN.style.opacity='.4'; rowNavN.style.pointerEvents='none'; }
+
 }
 
 // COPIA IBAN
