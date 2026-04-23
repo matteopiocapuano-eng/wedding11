@@ -140,6 +140,9 @@ nav.scrolled{box-shadow:0 1px 20px rgba(26,46,61,.08);}
 .rsvp-card.disabled{opacity:.4;pointer-events:none;user-select:none;transition:opacity .4s;}
 .btn-add-ospite{width:100%;padding:.8rem;background:transparent;border:1px dashed var(--accent);color:var(--accent);font-family:'Jost',sans-serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;margin-top:1rem;transition:all .3s;display:block;}
 .btn-add-ospite:hover{background:var(--accent);color:#fff;}
+.campo-errore{border-bottom:2px solid var(--danger) !important;}
+.campo-errore::placeholder{color:rgba(192,57,43,.5);}
+.errore-msg{font-size:.72rem;color:var(--danger);margin-top:.3rem;display:block;}
 .persona-row{display:flex;align-items:center;gap:1.5rem;padding:.75rem 0;border-bottom:1px solid var(--border);}
 .persona-row:last-child{border-bottom:none;}
 .persona-label{font-size:.72rem;font-weight:500;color:var(--ink2);min-width:110px;flex-shrink:0;}
@@ -782,18 +785,63 @@ function raccogliOspitiExtra() {
 
 let _invioInCorso = false;
 
+// Mostra errore su un campo e scrolla ad esso
+function segnalaErrore(el, msg) {
+  el.classList.add('campo-errore');
+  // rimuovi errore quando l'utente inizia a correggere
+  el.addEventListener('input', () => el.classList.remove('campo-errore'), { once: true });
+  el.addEventListener('change', () => el.classList.remove('campo-errore'), { once: true });
+  // scrolla al campo
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.focus();
+}
+
+function segnalaErroreRadio(wrap, msg) {
+  wrap.style.outline = '2px solid var(--danger)';
+  wrap.style.borderRadius = '4px';
+  wrap.style.padding = '4px';
+  setTimeout(() => { wrap.style.outline = ''; wrap.style.padding = ''; }, 3000);
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function validaForm(presenza, navetta, nome, cognome, ospitiExtra) {
+  // Nome ospite principale
+  const elNome = document.getElementById('f-nome');
+  if (!nome) { segnalaErrore(elNome, 'Nome obbligatorio'); return false; }
+  const elCognome = document.getElementById('f-cognome');
+  if (!cognome) { segnalaErrore(elCognome, 'Cognome obbligatorio'); return false; }
+
+  // Navetta ospite principale (solo se partecipa)
+  if (presenza === 'si') {
+    const navWrap = document.querySelector('#navetta-persone-wrap .persona-row .radio-g');
+    if (!navetta || navetta === '') {
+      segnalaErroreRadio(navWrap, 'Scegli navetta');
+      return false;
+    }
+  }
+
+  // Ospiti extra
+  for (let i = 0; i < ospitiExtra.length; i++) {
+    const ex = ospitiExtra[i];
+    const elN = document.getElementById(`eg-nome-${i}`);
+    const elC = document.getElementById(`eg-cognome-${i}`);
+    if (!ex.nome) { segnalaErrore(elN, 'Nome obbligatorio'); return false; }
+    if (!ex.cognome) { segnalaErrore(elC, 'Cognome obbligatorio'); return false; }
+    if (presenza === 'si' && !ex.navetta) {
+      const navRow = document.querySelector(`#navetta-row-extra-${i+1} .radio-g`);
+      if (navRow) segnalaErroreRadio(navRow, 'Scegli navetta');
+      return false;
+    }
+  }
+  return true;
+}
+
 async function submitForm(e){
   e.preventDefault();
   if (_invioInCorso) return; // blocca doppio invio
-  _invioInCorso = true;
-  const btn = document.getElementById("submit-btn");
-  const loadingWrap = document.getElementById("loading-bar-wrap");
-  btn.disabled = true;
-  btn.textContent = "Invio in corso…";
-  loadingWrap.classList.add("show");
 
   const presenza      = document.querySelector('input[name="presenza"]:checked')?.value || "";
-  const navetta       = document.querySelector('input[name="navetta"]:checked')?.value || "no";
+  const navetta       = document.querySelector('input[name="navetta"]:checked')?.value || "";
   const intolleranze  = [...document.querySelectorAll('#intol-grid input:checked')].map(i => i.value).join(", ");
   const nome          = document.getElementById("f-nome").value.trim();
   const cognome       = document.getElementById("f-cognome").value.trim();
@@ -805,6 +853,16 @@ async function submitForm(e){
   const note_menu     = document.getElementById("f-note-menu")?.value?.trim() || "";
   const messaggio     = document.getElementById("f-messaggio")?.value.trim() || "";
   const ospitiExtra   = raccogliOspitiExtra();
+
+  // Validazione prima di inviare
+  if (!validaForm(presenza, navetta, nome, cognome, ospitiExtra)) return;
+
+  // Tutto ok — blocca doppio invio e mostra loading
+  _invioInCorso = true;
+  const btn = document.getElementById("submit-btn");
+  const loadingWrap = document.getElementById("loading-bar-wrap");
+  btn.disabled = true;
+  loadingWrap.classList.add("show");
 
   // Riga principale (ospite 1)
   const formData = { nome, cognome, email, tel, presenza, ospiti, partecipazione, navetta, navetta_n, intolleranze, note_menu, messaggio };
@@ -818,17 +876,17 @@ async function submitForm(e){
     for (let i = 0; i < ospitiExtra.length; i++) {
       const ex = ospitiExtra[i];
       const extraData = {
-        nome: ex.nome || `Ospite ${i+2}`,
-        cognome: ex.cognome,
-        email: email, // email referente del gruppo
+        nome: ex.nome || `Ospite`,
+        cognome: ex.cognome || `${i+2}`,  // garantisce nome+cognome non vuoti
+        email: email,
         tel: '',
         presenza: presenza,
         ospiti: '',
         partecipazione: partecipazione,
-        navetta: ex.navetta || '',
+        navetta: ex.navetta || 'no',
         navetta_n: '',
-        intolleranze: ex.intolleranze,
-        note_menu: ex.note_menu,
+        intolleranze: ex.intolleranze || '',
+        note_menu: ex.note_menu || '',
         messaggio: `Accompagnatore di ${nome} ${cognome}`
       };
       await sendWithRetry(GOOGLE_SHEET_URL, extraData);
