@@ -777,11 +777,14 @@ function aggiornaOspitiExtra(val) {
 
 function aggiungiPersonaExtra() {
   numOspitiExtra++;
-  const i = numOspitiExtra; // indice persona (1-based, 0 = principale)
+  const i = numOspitiExtra;
   aggiungiNomeExtra(i);
   aggiungiNavettaPersona(i);
   aggiungiMenuPersona(i);
   aggiornaTuttiLabel();
+  // Sposta il bottone sempre in fondo dopo l'ultimo ospite aggiunto
+  const btn = document.getElementById('btn-add-ospite');
+  if (btn) document.getElementById('extra-nomi-wrap').appendChild(btn);
 }
 
 function raccogliOspitiExtra() {
