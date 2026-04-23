@@ -448,7 +448,7 @@ footer{background:var(--bg3);padding:4rem 2rem;text-align:center;}
       <div class="success-box" id="success-box">
         <div class="success-ico">💌</div>
         <h3 class="success-t">Grazie mille!</h3>
-        <p class="success-s">La tua risposta è stata registrata con successo.<br>Non vediamo l'ora di festeggiare insieme a te il <strong>11 agosto 2026</strong> in Puglia!</p>
+        <p class="success-s" id="success-msg">La tua risposta è stata registrata con successo.</p>
         <div class="recap-wrap" id="success-detail"></div>
         <button class="btn-altro" onclick="resetForm()">Invia un'altra risposta</button>
       </div>
@@ -942,6 +942,9 @@ async function submitForm(e){
     }
 
     document.getElementById("success-detail").innerHTML = detailHtml;
+    document.getElementById("success-msg").innerHTML = presenza === "si"
+      ? "La tua risposta è stata registrata con successo.<br>Non vediamo l'ora di festeggiare insieme a te l'<strong>11 agosto 2026</strong> in Puglia! 🎉"
+      : "La tua risposta è stata registrata con successo.<br>Ci dispiace non poterti avere con noi, ma ti siamo comunque grati per aver risposto. 🤍";
     loadingWrap.classList.remove("show");
     document.getElementById("rsvp-form").style.display = "none";
     document.getElementById("success-box").classList.add("show");
