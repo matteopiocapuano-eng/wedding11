@@ -1002,6 +1002,12 @@ function resetForm(){
   const rowOspiti = document.querySelector('#f-ospiti')?.closest('.form-row');
   if (rowOspiti) { rowOspiti.style.opacity='.4'; rowOspiti.style.pointerEvents='none'; }
 
+  // Ripristina label "Tu" nelle sezioni navetta e menu
+  const navLabel0 = document.getElementById('nav-label-0');
+  const menuLabel0 = document.getElementById('menu-label-0');
+  if (navLabel0) navLabel0.textContent = 'Tu';
+  if (menuLabel0) menuLabel0.textContent = 'Tu';
+
   // Scroll torna su al form RSVP
   document.getElementById("rsvp").scrollIntoView({ behavior: "smooth", block: "start" });
 }
