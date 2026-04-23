@@ -476,6 +476,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sezione numero ospiti/presenza a — è dentro card-partecipazione, la gestiamo a parte
   const rowOspiti = document.querySelector('#f-ospiti')?.closest('.form-row');
 
+  function resetSezionePresenza() {
+    document.getElementById('f-ospiti').value = '';
+    document.getElementById('f-partecipazione').selectedIndex = 0;
+    document.querySelectorAll('input[name="navetta"]').forEach(r => r.checked = false);
+    document.getElementById('f-navetta-n').value = '0';
+    document.querySelectorAll('#intol-grid input[type="checkbox"]').forEach(c => c.checked = false);
+    document.getElementById('f-note-menu').value = '';
+    document.getElementById('f-messaggio').value = '';
+  }
+
+  function resetSezioneNavetta() {
+    document.getElementById('f-navetta-n').value = '0';
+  }
+
   function aggiornaSezionPresenza(val) {
     const disabilitare = val === 'no';
     ['card-navetta','card-menu','card-messaggio'].forEach(id => {
@@ -483,19 +497,22 @@ document.addEventListener('DOMContentLoaded', () => {
       if (el) el.classList.toggle('disabled', disabilitare);
     });
     if (rowOspiti) {
-      rowOspiti.style.opacity    = disabilitare ? '.4' : '1';
+      rowOspiti.style.opacity       = disabilitare ? '.4' : '1';
       rowOspiti.style.pointerEvents = disabilitare ? 'none' : '';
     }
-    // Se disabilito presenza, resetto anche navetta
-    if (disabilitare) aggiornaSezionNavetta('no');
+    if (disabilitare) {
+      resetSezionePresenza();
+      aggiornaSezionNavetta('no');
+    }
   }
 
   function aggiornaSezionNavetta(val) {
     const rowNavN = document.getElementById('f-navetta-n')?.closest('.form-row');
     if (rowNavN) {
-      rowNavN.style.opacity    = val === 'si' ? '1' : '.4';
+      rowNavN.style.opacity       = val === 'si' ? '1' : '.4';
       rowNavN.style.pointerEvents = val === 'si' ? '' : 'none';
     }
+    if (val === 'no') resetSezioneNavetta();
   }
 
   // Listener presenza
