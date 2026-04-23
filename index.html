@@ -506,69 +506,82 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
 const obs=new IntersectionObserver(entries=>entries.forEach(el=>{if(el.isIntersecting)el.target.classList.add("vis");}),{threshold:.08});
 document.querySelectorAll(".fu").forEach(el=>obs.observe(el));
 
-// SUBMIT FORM — Google Sheets
+// SUBMIT FORM — Google Sheets (versione affidabile con retry)
 const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwPbQj1Mhc8G9ZusdeVcQ0g_g_HkcdVvAB55mgTh5vgYFr1BHmI0jgVs2-zQvDx8a2q/exec';
+const MAX_RETRY = 3;
+const RETRY_DELAY_MS = 2000;
+
+// Invia con retry automatico (max 3 tentativi, backoff esponenziale)
+async function sendWithRetry(url, payload, attempt = 1) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000); // 12s timeout per tentativo
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+      // NOTA: nessun mode:"no-cors" — ci serve leggere la risposta JSON
+    });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const json = await res.json();
+    if (json.status !== "ok") throw new Error("Backend error: " + (json.message || "unknown"));
+    return json; // successo
+  } catch (err) {
+    clearTimeout(timeout);
+    if (attempt < MAX_RETRY) {
+      const delay = RETRY_DELAY_MS * attempt; // 2s, 4s, 6s
+      console.warn(`Tentativo ${attempt} fallito (${err.message}). Riprovo tra ${delay/1000}s...`);
+      await new Promise(r => setTimeout(r, delay));
+      return sendWithRetry(url, payload, attempt + 1);
+    }
+    throw err; // tutti i tentativi esauriti
+  }
+}
 
 async function submitForm(e){
   e.preventDefault();
-  const btn=document.getElementById("submit-btn");
-  btn.disabled=true; btn.textContent="Invio in corso...";
-  
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "Invio in corso…";
+
   // Raccogli tutti i dati dal form
-  const presenza=document.querySelector('input[name="presenza"]:checked')?.value||"";
-  const navetta=document.querySelector('input[name="navetta"]:checked')?.value||"no";
-  const intolleranze=[...document.querySelectorAll('#intol-grid input:checked')].map(i=>i.value).join(", ");
-  const nome=document.getElementById("f-nome").value.trim();
-  const cognome=document.getElementById("f-cognome").value.trim();
-  const email=document.getElementById("f-email").value.trim();
-  const tel=document.getElementById("f-tel").value.trim();
-  const ospiti=document.getElementById("f-ospiti").value.trim();
-  const partecipazione=document.getElementById("f-partecipazione").value;
-  const navetta_n=document.getElementById("f-navetta-n")?.value.trim()||"";
-  const note_menu=document.getElementById("f-note-menu")?.value.trim()||"";
-  const messaggio=document.getElementById("f-messaggio")?.value.trim()||"";
-  
-  // Prepara i dati da inviare
-  const formData = {
-    nome: nome,
-    cognome: cognome,
-    email: email,
-    tel: tel,
-    presenza: presenza,
-    ospiti: ospiti,
-    partecipazione: partecipazione,
-    navetta: navetta,
-    navetta_n: navetta_n,
-    intolleranze: intolleranze,
-    note_menu: note_menu,
-    messaggio: messaggio
-  };
-  
-  try{
-    // Invia al Google Sheet
-    const res = await fetch(GOOGLE_SHEET_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(formData)
-    });
-    
-    // Con no-cors non possiamo leggere la risposta, quindi assumiamo successo
-    // Mostra il messaggio di successo
-    document.getElementById("success-detail").innerHTML=
-      `<strong>${nome} ${cognome}</strong><br>`+
-      `Partecipa: ${presenza==="si"?"✅ Sì":"❌ No"}<br>`+
-      (presenza==="si"?`Ospiti: ${ospiti||"—"} &nbsp;·&nbsp; ${partecipazione}<br>Navetta: ${navetta==="si"?"🚌 Sì":"No"}<br>`:"") +
-      (intolleranze?`Intolleranze: ${intolleranze}<br>`:"");
-    document.getElementById("rsvp-form").style.display="none";
+  const presenza      = document.querySelector('input[name="presenza"]:checked')?.value || "";
+  const navetta       = document.querySelector('input[name="navetta"]:checked')?.value || "no";
+  const intolleranze  = [...document.querySelectorAll('#intol-grid input:checked')].map(i => i.value).join(", ");
+  const nome          = document.getElementById("f-nome").value.trim();
+  const cognome       = document.getElementById("f-cognome").value.trim();
+  const email         = document.getElementById("f-email").value.trim();
+  const tel           = document.getElementById("f-tel").value.trim();
+  const ospiti        = document.getElementById("f-ospiti").value.trim();
+  const partecipazione= document.getElementById("f-partecipazione").value;
+  const navetta_n     = document.getElementById("f-navetta-n")?.value.trim() || "";
+  const note_menu     = document.getElementById("f-note-menu")?.value.trim() || "";
+  const messaggio     = document.getElementById("f-messaggio")?.value.trim() || "";
+
+  const formData = { nome, cognome, email, tel, presenza, ospiti, partecipazione, navetta, navetta_n, intolleranze, note_menu, messaggio };
+
+  try {
+    btn.textContent = "Invio in corso… (tentativo 1/3)";
+    await sendWithRetry(GOOGLE_SHEET_URL, formData);
+
+    // ✅ Successo confermato dal backend
+    document.getElementById("success-detail").innerHTML =
+      `<strong>${nome} ${cognome}</strong><br>` +
+      `Partecipa: ${presenza === "si" ? "✅ Sì" : "❌ No"}<br>` +
+      (presenza === "si"
+        ? `Ospiti: ${ospiti || "—"} &nbsp;·&nbsp; ${partecipazione}<br>Navetta: ${navetta === "si" ? "🚌 Sì" : "No"}<br>`
+        : "") +
+      (intolleranze ? `Intolleranze: ${intolleranze}<br>` : "");
+    document.getElementById("rsvp-form").style.display = "none";
     document.getElementById("success-box").classList.add("show");
-    
-  } catch(err){
-    console.error("Errore invio:", err);
-    alert("Errore nell'invio. Controlla la connessione e riprova.");
-    btn.disabled=false; btn.textContent="Invia conferma";
+
+  } catch(err) {
+    console.error("Tutti i tentativi falliti:", err);
+    btn.disabled = false;
+    btn.textContent = "Invia conferma";
+    alert("❌ Impossibile inviare dopo 3 tentativi.\n\nControlla la connessione e riprova. Se il problema persiste, scrivi direttamente a matteopio.capuano@gmail.com");
   }
 }
 function resetForm(){
