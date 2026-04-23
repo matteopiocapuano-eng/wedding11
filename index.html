@@ -575,12 +575,13 @@ async function sendWithRetry(url, payload, attempt = 1) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000); // 12s timeout per tentativo
   try {
+    // URL-encoded evita il CORS preflight che blocca Apps Script con application/json
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(payload).toString(),
       signal: controller.signal,
-      keepalive: true // la richiesta completa anche se l'utente chiude la pagina
+      keepalive: true
     });
     clearTimeout(timeout);
     if (!res.ok) throw new Error("HTTP " + res.status);
