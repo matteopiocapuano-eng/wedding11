@@ -520,8 +520,8 @@ async function sendWithRetry(url, payload, attempt = 1) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-      signal: controller.signal
-      // NOTA: nessun mode:"no-cors" — ci serve leggere la risposta JSON
+      signal: controller.signal,
+      keepalive: true // la richiesta completa anche se l'utente chiude la pagina
     });
     clearTimeout(timeout);
     if (!res.ok) throw new Error("HTTP " + res.status);
