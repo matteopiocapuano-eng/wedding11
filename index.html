@@ -137,6 +137,7 @@ nav.scrolled{box-shadow:0 1px 20px rgba(26,46,61,.08);}
 .c-opt{display:flex;align-items:center;gap:.4rem;font-size:.78rem;cursor:pointer;}
 .c-opt input{accent-color:var(--accent);}
 .navetta-note{font-size:.76rem;color:var(--ink3);line-height:1.7;margin-bottom:1rem;padding:.8rem 1rem;background:var(--bg2);border-left:2px solid var(--accent);}
+.rsvp-card.disabled{opacity:.4;pointer-events:none;user-select:none;transition:opacity .4s;}
 .btn-send{width:100%;padding:1rem;background:var(--accent);color:#fff;border:none;font-family:'Jost',sans-serif;font-size:.66rem;letter-spacing:.25em;text-transform:uppercase;cursor:pointer;transition:background .3s;margin-top:.5rem;}
 .btn-send:hover{background:var(--accent2);}
 .btn-send:disabled{opacity:.5;cursor:not-allowed;}
@@ -369,7 +370,7 @@ footer{background:var(--bg3);padding:4rem 2rem;text-align:center;}
             <div class="fg"><label>Hai bisogno della navetta?</label>
               <div class="radio-g">
                 <label class="r-opt"><input type="radio" name="navetta" value="si"><span>Sì, la utilizzo</span></label>
-                <label class="r-opt"><input type="radio" name="navetta" value="no" checked><span>No, arrivo autonomamente</span></label>
+                <label class="r-opt"><input type="radio" name="navetta" value="no"><span>No, arrivo autonomamente</span></label>
               </div>
             </div>
           </div>
@@ -459,6 +460,64 @@ footer{background:var(--bg3);padding:4rem 2rem;text-align:center;}
 </footer>
 
 <script>
+// LOGICA ABILITAZIONE SEZIONI
+const cardsToDisableIfNo    = ['card-ospiti','card-navetta','card-menu','card-messaggio'];
+const cardsToDisableIfNoNav = ['card-navetta-n'];
+
+// Aggiunge id alle card per selezionarle
+document.addEventListener('DOMContentLoaded', () => {
+  const cards = document.querySelectorAll('.rsvp-card');
+  // card 0 = dati personali, 1 = partecipazione, 2 = navetta, 3 = menu, 4 = messaggio
+  if (cards[1]) cards[1].id = 'card-partecipazione';
+  if (cards[2]) cards[2].id = 'card-navetta';
+  if (cards[3]) cards[3].id = 'card-menu';
+  if (cards[4]) cards[4].id = 'card-messaggio';
+
+  // Sezione numero ospiti/presenza a — è dentro card-partecipazione, la gestiamo a parte
+  const rowOspiti = document.querySelector('#f-ospiti')?.closest('.form-row');
+
+  function aggiornaSezionPresenza(val) {
+    const disabilitare = val === 'no';
+    ['card-navetta','card-menu','card-messaggio'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('disabled', disabilitare);
+    });
+    if (rowOspiti) {
+      rowOspiti.style.opacity    = disabilitare ? '.4' : '1';
+      rowOspiti.style.pointerEvents = disabilitare ? 'none' : '';
+    }
+    // Se disabilito presenza, resetto anche navetta
+    if (disabilitare) aggiornaSezionNavetta('no');
+  }
+
+  function aggiornaSezionNavetta(val) {
+    const rowNavN = document.getElementById('f-navetta-n')?.closest('.form-row');
+    if (rowNavN) {
+      rowNavN.style.opacity    = val === 'si' ? '1' : '.4';
+      rowNavN.style.pointerEvents = val === 'si' ? '' : 'none';
+    }
+  }
+
+  // Listener presenza
+  document.querySelectorAll('input[name="presenza"]').forEach(r => {
+    r.addEventListener('change', e => aggiornaSezionPresenza(e.target.value));
+  });
+
+  // Listener navetta
+  document.querySelectorAll('input[name="navetta"]').forEach(r => {
+    r.addEventListener('change', e => aggiornaSezionNavetta(e.target.value));
+  });
+
+  // Stato iniziale: tutto disabilitato tranne dati personali e partecipazione
+  ['card-navetta','card-menu','card-messaggio'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('disabled');
+  });
+  if (rowOspiti) { rowOspiti.style.opacity = '.4'; rowOspiti.style.pointerEvents = 'none'; }
+  // Navetta-n disabilitata di default (nessuna selezione)
+  aggiornaSezionNavetta('no');
+});
+
 // COUNTDOWN
 function tick(){
   const t=new Date("2026-08-11T15:00:00"),now=new Date();
@@ -590,6 +649,15 @@ function resetForm(){
   document.getElementById("success-box").classList.remove("show");
   document.getElementById("submit-btn").disabled=false;
   document.getElementById("submit-btn").textContent="Invia conferma";
+  // Ripristina stato disabilitato sezioni
+  ['card-navetta','card-menu','card-messaggio'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('disabled');
+  });
+  const rowOspiti = document.querySelector('#f-ospiti')?.closest('.form-row');
+  if (rowOspiti) { rowOspiti.style.opacity='.4'; rowOspiti.style.pointerEvents='none'; }
+  const rowNavN = document.getElementById('f-navetta-n')?.closest('.form-row');
+  if (rowNavN) { rowNavN.style.opacity='.4'; rowNavN.style.pointerEvents='none'; }
 }
 
 // COPIA IBAN
