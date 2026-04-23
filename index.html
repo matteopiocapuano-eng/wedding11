@@ -950,30 +950,36 @@ async function submitForm(e){
       document.getElementById("success-box").scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
 
-    // Dopo 3.5s inizia uno scroll lento e continuo fino alla sezione regalo
+    // Aspetta che l'utente legga tutto il recap, poi scrolla lentamente fino al Gift
     setTimeout(() => {
-      const regalo = document.getElementById("regalo");
-      if (!regalo) return;
-      const targetY = regalo.getBoundingClientRect().top + window.scrollY;
-      const startY  = window.scrollY;
-      const distance = targetY - startY;
-      const duration = 5500; // ms — lento e costante
-      let startTime = null;
-      function easeLinearSlowEnd(t) {
-        // quasi lineare, decelera solo leggermente alla fine
-        return t < 0.85 ? t / 0.85 * 0.85 : 0.85 + (t - 0.85) * (1 - 0.85) / (1 - 0.85) * 0.5;
-      }
-      function scrollStep(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        // lineare pura con leggerissima frenata finale
-        const ease = progress < 0.9 ? progress : 0.9 + (progress - 0.9) * 0.4;
-        window.scrollTo(0, startY + distance * ease);
-        if (progress < 1) requestAnimationFrame(scrollStep);
-      }
-      requestAnimationFrame(scrollStep);
-    }, 3500);
+      const regalo  = document.getElementById("regalo");
+      const recap   = document.getElementById("success-detail");
+      if (!regalo || !recap) return;
+
+      // Calcola tempo di lettura stimato: ~200px al secondo di contenuto visibile
+      // minimo 3s, massimo 9s
+      const recapH   = recap.offsetHeight;
+      const readTime = Math.min(Math.max(recapH * 12, 3000), 9000);
+
+      setTimeout(() => {
+        const targetY = regalo.getBoundingClientRect().top + window.scrollY;
+        const startY  = window.scrollY;
+        const distance = targetY - startY;
+        // durata proporzionale alla distanza: ~120px/s — lento e costante
+        const duration = Math.max(distance / 120 * 1000, 4000);
+        let startTime = null;
+        function scrollStep(timestamp) {
+          if (!startTime) startTime = timestamp;
+          const elapsed  = timestamp - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          // lineare con leggerissima frenata finale
+          const ease = progress < 0.92 ? progress : 0.92 + (progress - 0.92) * 0.35;
+          window.scrollTo(0, startY + distance * ease);
+          if (progress < 1) requestAnimationFrame(scrollStep);
+        }
+        requestAnimationFrame(scrollStep);
+      }, readTime);
+    }, 800); // piccola pausa dopo che il recap appare
 
   } catch(err) {
     console.error("Tutti i tentativi falliti:", err);
