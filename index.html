@@ -154,12 +154,17 @@ nav.scrolled{box-shadow:0 1px 20px rgba(26,46,61,.08);}
 .loading-bar{height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .3s ease;animation:loadpulse 1.8s ease-in-out infinite;}
 @keyframes loadpulse{0%{width:0%;opacity:1;}60%{width:85%;opacity:1;}100%{width:95%;opacity:.6;}}
 .btn-send-wrap{position:relative;}
-.success-box{display:none;background:var(--white);padding:3rem;border-top:2px solid var(--accent);text-align:center;box-shadow:0 4px 30px rgba(26,46,61,.07);}
+.success-box{display:none;background:var(--white);padding:3rem 2.5rem;border-top:2px solid var(--accent);text-align:center;box-shadow:0 4px 30px rgba(26,46,61,.07);}
 .success-box.show{display:block;}
-.success-ico{font-size:2.2rem;margin-bottom:1rem;}
-.success-t{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--ink);margin-bottom:.5rem;}
-.success-s{font-size:.82rem;color:var(--ink3);margin-bottom:1.5rem;}
-.success-detail{background:var(--bg2);padding:1rem 1.4rem;text-align:left;font-size:.8rem;color:var(--ink2);line-height:2;margin-bottom:1.5rem;}
+.success-ico{font-size:2.8rem;margin-bottom:1.2rem;}
+.success-t{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:var(--ink);margin-bottom:.4rem;}
+.success-s{font-size:.82rem;color:var(--ink3);margin-bottom:2rem;line-height:1.8;}
+.recap-wrap{text-align:left;margin-bottom:2rem;}
+.recap-block{background:var(--bg2);border-left:2px solid var(--accent);padding:1rem 1.4rem;margin-bottom:.8rem;}
+.recap-block-title{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem;}
+.recap-row{font-size:.8rem;color:var(--ink2);line-height:1.9;display:flex;gap:.5rem;}
+.recap-row strong{color:var(--ink);min-width:90px;font-weight:500;font-size:.78rem;}
+.recap-ospite{margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border);}
 .btn-altro{padding:.7rem 2rem;background:transparent;border:1px solid var(--accent);color:var(--accent);font-family:'Jost',sans-serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s;}
 .btn-altro:hover{background:var(--accent);color:#fff;}
 
@@ -440,8 +445,8 @@ footer{background:var(--bg3);padding:4rem 2rem;text-align:center;}
       <div class="success-box" id="success-box">
         <div class="success-ico">💌</div>
         <h3 class="success-t">Grazie mille!</h3>
-        <p class="success-s">La tua risposta è stata registrata con successo.<br>Non vediamo l'ora di festeggiare insieme a Puglia!</p>
-        <div class="success-detail" id="success-detail"></div>
+        <p class="success-s">La tua risposta è stata registrata con successo.<br>Non vediamo l'ora di festeggiare insieme a te il <strong>11 agosto 2026</strong> in Puglia!</p>
+        <div class="recap-wrap" id="success-detail"></div>
         <button class="btn-altro" onclick="resetForm()">Invia un'altra risposta</button>
       </div>
     </div>
@@ -850,21 +855,63 @@ async function submitForm(e){
       await sendWithRetry(GOOGLE_SHEET_URL, extraData);
     }
 
-    // ✅ Successo
-    let detailHtml = `<strong>${nome} ${cognome}</strong> (referente)<br>` +
-      `Partecipa: ${presenza === "si" ? "✅ Sì" : "❌ No"}<br>` +
-      (presenza === "si" ? `Ospiti: ${ospiti || "—"} &nbsp;·&nbsp; ${partecipazione}<br>Navetta: ${navetta === "si" ? "🚌 Sì" : "No"}<br>` : "") +
-      (intolleranze ? `Intolleranze: ${intolleranze}<br>` : "");
-    ospitiExtra.forEach((ex, i) => {
-      const nomeEx = (ex.nome || ex.cognome) ? `${ex.nome} ${ex.cognome}`.trim() : `Ospite ${i+2}`;
-      detailHtml += `<br><strong>${nomeEx}</strong><br>`;
-      if (ex.navetta) detailHtml += `Navetta: ${ex.navetta === 'si' ? '🚌 Sì' : 'No'}<br>`;
-      if (ex.intolleranze) detailHtml += `Intolleranze: ${ex.intolleranze}<br>`;
-    });
+    // ✅ Successo — costruisce recap elegante
+    function recapPersona(nomeP, navP, intolP, noteP) {
+      const navTxt = navP === 'si' ? '🚌 Sì, utilizza la navetta' : navP === 'no' ? 'No, arriva autonomamente' : '—';
+      const intolTxt = intolP || 'Nessuna';
+      return `
+        <div class="recap-row"><strong>Navetta</strong>${navTxt}</div>
+        ${intolP ? `<div class="recap-row"><strong>Intolleranze</strong>${intolTxt}</div>` : ''}
+        ${noteP ? `<div class="recap-row"><strong>Note menù</strong>${noteP}</div>` : ''}`;
+    }
+
+    let detailHtml = '';
+
+    // Blocco evento
+    detailHtml += `
+      <div class="recap-block">
+        <div class="recap-block-title">📅 Evento</div>
+        <div class="recap-row"><strong>Presenza</strong>${presenza === 'si' ? '✅ Parteciperò' : '❌ Non potrò esserci'}</div>
+        ${presenza === 'si' ? `<div class="recap-row"><strong>Cerimonia</strong>${partecipazione}</div>` : ''}
+        ${presenza === 'si' ? `<div class="recap-row"><strong>Gruppo</strong>${ospiti || '1 persona'}</div>` : ''}
+      </div>`;
+
+    if (presenza === 'si') {
+      // Blocco tu
+      detailHtml += `
+        <div class="recap-block">
+          <div class="recap-block-title">👤 ${nome} ${cognome}</div>
+          ${recapPersona(nome, navetta, intolleranze, note_menu)}
+        </div>`;
+
+      // Blocco ogni ospite extra
+      ospitiExtra.forEach((ex, i) => {
+        const nomeEx = (ex.nome || ex.cognome) ? `${ex.nome} ${ex.cognome}`.trim() : `Ospite ${i+2}`;
+        detailHtml += `
+          <div class="recap-block">
+            <div class="recap-block-title">👤 ${nomeEx}</div>
+            ${recapPersona(nomeEx, ex.navetta, ex.intolleranze, ex.note_menu)}
+          </div>`;
+      });
+
+      // Blocco messaggio se presente
+      if (messaggio) {
+        detailHtml += `
+          <div class="recap-block">
+            <div class="recap-block-title">💬 Il tuo messaggio</div>
+            <div class="recap-row" style="font-style:italic;">${messaggio}</div>
+          </div>`;
+      }
+    }
+
     document.getElementById("success-detail").innerHTML = detailHtml;
     loadingWrap.classList.remove("show");
     document.getElementById("rsvp-form").style.display = "none";
     document.getElementById("success-box").classList.add("show");
+    // Scroll morbido al recap, non alla sezione regalo
+    setTimeout(() => {
+      document.getElementById("success-box").scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
 
   } catch(err) {
     console.error("Tutti i tentativi falliti:", err);
