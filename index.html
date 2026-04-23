@@ -898,10 +898,11 @@ async function submitForm(e){
     }
 
     // ✅ Successo — costruisce recap elegante
-    function recapPersona(nomeP, navP, intolP, noteP) {
+    function recapPersona(nomeP, navP, intolP, noteP, bambinoP) {
       const navTxt = navP === 'si' ? '🚌 Sì, utilizza la navetta' : navP === 'no' ? 'No, arriva autonomamente' : '—';
       const intolTxt = intolP || 'Nessuna';
       return `
+        ${bambinoP === 'si' ? `<div class="recap-row"><strong>Tipo</strong>👶 Bambino/a</div>` : ''}
         <div class="recap-row"><strong>Navetta</strong>${navTxt}</div>
         ${intolP ? `<div class="recap-row"><strong>Intolleranze</strong>${intolTxt}</div>` : ''}
         ${noteP ? `<div class="recap-row"><strong>Note menù</strong>${noteP}</div>` : ''}`;
@@ -923,16 +924,17 @@ async function submitForm(e){
       detailHtml += `
         <div class="recap-block">
           <div class="recap-block-title">👤 ${nome} ${cognome}</div>
-          ${recapPersona(nome, navetta, intolleranze, note_menu)}
+          ${recapPersona(nome, navetta, intolleranze, note_menu, 'no')}
         </div>`;
 
       // Blocco ogni ospite extra
       ospitiExtra.forEach((ex, i) => {
         const nomeEx = (ex.nome || ex.cognome) ? `${ex.nome} ${ex.cognome}`.trim() : `Ospite ${i+2}`;
+        const icona = ex.bambino === 'si' ? '👶' : '👤';
         detailHtml += `
           <div class="recap-block">
-            <div class="recap-block-title">👤 ${nomeEx}</div>
-            ${recapPersona(nomeEx, ex.navetta, ex.intolleranze, ex.note_menu)}
+            <div class="recap-block-title">${icona} ${nomeEx}</div>
+            ${recapPersona(nomeEx, ex.navetta, ex.intolleranze, ex.note_menu, ex.bambino)}
           </div>`;
       });
 
