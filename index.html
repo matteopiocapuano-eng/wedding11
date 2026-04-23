@@ -780,8 +780,12 @@ function raccogliOspitiExtra() {
   return result;
 }
 
+let _invioInCorso = false;
+
 async function submitForm(e){
   e.preventDefault();
+  if (_invioInCorso) return; // blocca doppio invio
+  _invioInCorso = true;
   const btn = document.getElementById("submit-btn");
   const loadingWrap = document.getElementById("loading-bar-wrap");
   btn.disabled = true;
@@ -913,18 +917,43 @@ async function submitForm(e){
   } catch(err) {
     console.error("Tutti i tentativi falliti:", err);
     loadingWrap.classList.remove("show");
+    _invioInCorso = false;
     btn.disabled = false;
     btn.textContent = "Invia conferma";
     alert("❌ Impossibile inviare dopo 3 tentativi.\n\nControlla la connessione e riprova. Se il problema persiste, scrivi direttamente a matteopio.capuano@gmail.com");
   }
 }
 function resetForm(){
+  // Reset flag anti-doppio invio
+  _invioInCorso = false;
+
+  // Reset form HTML (svuota tutti i campi)
   document.getElementById("rsvp-form").reset();
   document.getElementById("rsvp-form").style.display="block";
   document.getElementById("success-box").classList.remove("show");
+
+  // Reset bottone
   document.getElementById("submit-btn").disabled=false;
   document.getElementById("submit-btn").textContent="Invia conferma";
-  // Ripristina stato disabilitato sezioni
+  document.getElementById("loading-bar-wrap").classList.remove("show");
+
+  // Reset ospiti extra — svuota nomi, navetta extra, menu extra
+  numOspitiExtra = 0;
+  document.getElementById('extra-nomi-wrap').innerHTML = '';
+  document.querySelectorAll('[id^="navetta-row-extra-"]').forEach(el => el.remove());
+  document.querySelectorAll('[id^="menu-block-extra-"]').forEach(el => el.remove());
+  document.getElementById('btn-add-ospite')?.remove();
+
+  // Reset radio presenza e navetta
+  document.querySelectorAll('input[name="presenza"]').forEach(r => r.checked = false);
+  document.querySelectorAll('input[name="navetta"]').forEach(r => r.checked = false);
+
+  // Reset checkbox intolleranze ospite principale
+  document.querySelectorAll('#intol-grid input[type="checkbox"]').forEach(c => c.checked = false);
+  const noteMenu = document.getElementById('f-note-menu');
+  if (noteMenu) noteMenu.value = '';
+
+  // Ripristina sezioni disabilitate
   ['card-navetta','card-menu','card-messaggio'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('disabled');
@@ -932,6 +961,8 @@ function resetForm(){
   const rowOspiti = document.querySelector('#f-ospiti')?.closest('.form-row');
   if (rowOspiti) { rowOspiti.style.opacity='.4'; rowOspiti.style.pointerEvents='none'; }
 
+  // Scroll torna su al form RSVP
+  document.getElementById("rsvp").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 // COPIA IBAN
