@@ -727,6 +727,9 @@ function aggiungiNomeExtra(i) {
     <div class="form-row" style="margin-bottom:0;">
       <div class="fg"><label>Nome</label><input type="text" id="eg-nome-${i-1}" placeholder="Nome ospite ${i+1}" oninput="aggiornaLabelOspite(${i})"></div>
       <div class="fg"><label>Cognome</label><input type="text" id="eg-cognome-${i-1}" placeholder="Cognome ospite ${i+1}" oninput="aggiornaLabelOspite(${i})"></div>
+    </div>
+    <div style="margin-top:.7rem;">
+      <label class="c-opt"><input type="checkbox" id="eg-bambino-${i-1}"> 👶 È un/a bambino/a</label>
     </div>`;
   wrap.appendChild(div);
 }
@@ -778,7 +781,8 @@ function raccogliOspitiExtra() {
     const navetta = document.querySelector(`input[name="eg-navetta-${i}"]:checked`)?.value || '';
     const intol   = [...document.querySelectorAll(`input[name="intol-extra-${i}"]:checked`)].map(c => c.value).join(', ');
     const note    = document.getElementById(`eg-note-${i}`)?.value?.trim() || '';
-    result.push({ nome, cognome, navetta, intolleranze: intol, note_menu: note });
+    const bambino = document.getElementById(`eg-bambino-${i}`)?.checked ? 'si' : 'no';
+    result.push({ nome, cognome, navetta, intolleranze: intol, note_menu: note, bambino });
   }
   return result;
 }
@@ -865,7 +869,7 @@ async function submitForm(e){
   loadingWrap.classList.add("show");
 
   // Riga principale (ospite 1)
-  const formData = { nome, cognome, email, tel, presenza, ospiti, partecipazione, navetta, navetta_n, intolleranze, note_menu, messaggio };
+  const formData = { nome, cognome, email, tel, presenza, ospiti, partecipazione, navetta, navetta_n, intolleranze, note_menu, bambino: 'no', messaggio };
 
   try {
     btn.textContent = "Invio in corso…";
@@ -887,6 +891,7 @@ async function submitForm(e){
         navetta_n: '',
         intolleranze: ex.intolleranze || '',
         note_menu: ex.note_menu || '',
+        bambino: ex.bambino || 'no',
         messaggio: `Accompagnatore di ${nome} ${cognome}`
       };
       await sendWithRetry(GOOGLE_SHEET_URL, extraData);
