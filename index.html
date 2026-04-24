@@ -532,17 +532,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function aggiornaSezionPresenza(val) {
     const disabilitare = val === 'no';
+    const rowOspitiPresenza = document.getElementById('row-ospiti-presenza');
+    const extraNomiWrap = document.getElementById('extra-nomi-wrap');
+
+    if (rowOspitiPresenza) rowOspitiPresenza.style.display = disabilitare ? 'none' : '';
+    if (extraNomiWrap) extraNomiWrap.style.display = disabilitare ? 'none' : '';
+
+    // Navetta e menu: nascoste finché non si sa se c'è ricevimento
+    // (verranno mostrate dal listener su f-partecipazione)
     ['card-navetta','card-menu'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
         el.classList.toggle('disabled', disabilitare);
-        el.style.display = disabilitare ? 'none' : '';
+        if (disabilitare) el.style.display = 'none';
       }
     });
-    const rowOspitiPresenza = document.getElementById('row-ospiti-presenza');
-    if (rowOspitiPresenza) rowOspitiPresenza.style.display = disabilitare ? 'none' : '';
-    const extraNomiWrap = document.getElementById('extra-nomi-wrap');
-    if (extraNomiWrap) extraNomiWrap.style.display = disabilitare ? 'none' : '';
+
     if (rowOspiti) {
       rowOspiti.style.opacity       = disabilitare ? '.4' : '1';
       rowOspiti.style.pointerEvents = disabilitare ? 'none' : '';
@@ -560,29 +565,22 @@ document.addEventListener('DOMContentLoaded', () => {
     r.addEventListener('change', e => aggiornaSezionPresenza(e.target.value));
   });
 
-  // Listener partecipazione — disabilita navetta e menu se solo cerimonia
+  // Listener partecipazione — mostra navetta e menu solo se c'è ricevimento
   document.getElementById('f-partecipazione').addEventListener('change', e => {
-    const soloCerimonia = e.target.value === 'Solo cerimonia (Manfredonia)';
+    const val = e.target.value;
+    const conRicevimento = val === 'Cerimonia + Ricevimento' || val === 'Solo ricevimento (Andria)';
     ['card-navetta','card-menu'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
-        el.classList.toggle('disabled', soloCerimonia);
-        el.style.display = soloCerimonia ? 'none' : '';
+        el.classList.toggle('disabled', !conRicevimento);
+        el.style.display = conRicevimento ? '' : 'none';
       }
     });
-    // Reset navetta e menu se solo cerimonia
-    if (soloCerimonia) {
-      // Deseleziona tutte le radio navetta
+    // Reset navetta e menu se non c'è ricevimento
+    if (!conRicevimento) {
       document.querySelectorAll('input[type="radio"][name^="eg-navetta"], input[type="radio"][name="navetta"]').forEach(r => r.checked = false);
-      // Deseleziona tutte le checkbox intolleranze
       document.querySelectorAll('input[type="checkbox"][name^="intol"]').forEach(c => c.checked = false);
-      // Svuota note menu
       document.querySelectorAll('input[id^="eg-note"], #f-note-menu').forEach(n => n.value = '');
-    } else {
-      ['card-navetta','card-menu'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = '';
-      });
     }
   });
 
