@@ -826,8 +826,10 @@ function validaForm(presenza, navetta, nome, cognome, ospitiExtra) {
   const elTel = document.getElementById('f-tel');
   if (!elTel.value.trim()) { segnalaErrore(elTel, 'Telefono obbligatorio'); return false; }
 
-  // Navetta ospite principale (solo se partecipa)
-  if (presenza === 'si') {
+  // Navetta ospite principale (solo se partecipa E non è solo cerimonia)
+  const partecipazione = document.getElementById('f-partecipazione').value;
+  const soloCerimonia = partecipazione === 'Solo cerimonia (Manfredonia)';
+  if (presenza === 'si' && !soloCerimonia) {
     const navWrap = document.querySelector('#navetta-persone-wrap .persona-row .radio-g');
     if (!navetta || navetta === '') {
       segnalaErroreRadio(navWrap, 'Scegli navetta');
@@ -842,7 +844,7 @@ function validaForm(presenza, navetta, nome, cognome, ospitiExtra) {
     const elC = document.getElementById(`eg-cognome-${i}`);
     if (!ex.nome) { segnalaErrore(elN, 'Nome obbligatorio'); return false; }
     if (!ex.cognome) { segnalaErrore(elC, 'Cognome obbligatorio'); return false; }
-    if (presenza === 'si' && !ex.navetta) {
+    if (presenza === 'si' && !soloCerimonia && !ex.navetta) {
       const navRow = document.querySelector(`#navetta-row-extra-${i+1} .radio-g`);
       if (navRow) segnalaErroreRadio(navRow, 'Scegli navetta');
       return false;
