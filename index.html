@@ -538,15 +538,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (rowOspitiPresenza) rowOspitiPresenza.style.display = disabilitare ? 'none' : '';
     if (extraNomiWrap) extraNomiWrap.style.display = disabilitare ? 'none' : '';
 
-    // Navetta e menu: nascoste finché non si sa se c'è ricevimento
-    // (verranno mostrate dal listener su f-partecipazione)
-    ['card-navetta','card-menu'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.classList.toggle('disabled', disabilitare);
-        if (disabilitare) el.style.display = 'none';
-      }
-    });
+    if (!disabilitare) {
+      // Imposta default "Cerimonia + Ricevimento" e mostra navetta e menu
+      document.getElementById('f-partecipazione').selectedIndex = 0;
+      ['card-navetta','card-menu'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.remove('disabled'); el.style.display = ''; }
+      });
+    } else {
+      ['card-navetta','card-menu'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.add('disabled'); el.style.display = 'none'; }
+      });
+    }
 
     if (rowOspiti) {
       rowOspiti.style.opacity       = disabilitare ? '.4' : '1';
