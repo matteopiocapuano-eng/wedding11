@@ -377,7 +377,7 @@ footer{background:var(--bg3);padding:4rem 2rem;text-align:center;}
               </div>
             </div>
           </div>
-          <div class="form-row" style="margin-top:1rem;">
+          <div class="form-row" id="row-ospiti-presenza" style="margin-top:1rem;">
             <div class="fg"><label>Quante persone siete in totale?</label>
               <select id="f-ospiti" name="ospiti">
                 <option value="">— Seleziona —</option>
@@ -539,6 +539,10 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.display = disabilitare ? 'none' : '';
       }
     });
+    const rowOspitiPresenza = document.getElementById('row-ospiti-presenza');
+    if (rowOspitiPresenza) rowOspitiPresenza.style.display = disabilitare ? 'none' : '';
+    const extraNomiWrap = document.getElementById('extra-nomi-wrap');
+    if (extraNomiWrap) extraNomiWrap.style.display = disabilitare ? 'none' : '';
     if (rowOspiti) {
       rowOspiti.style.opacity       = disabilitare ? '.4' : '1';
       rowOspiti.style.pointerEvents = disabilitare ? 'none' : '';
