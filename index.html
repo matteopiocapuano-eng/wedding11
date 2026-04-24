@@ -612,10 +612,10 @@ document.querySelectorAll(".fu").forEach(el=>obs.observe(el));
 
 // SUBMIT FORM — Google Sheets (versione affidabile con retry)
 const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxVRtoT4CKIGpyk9se5F6-mkhhjvmk5KumeEktfwLxF_EC3-2XjKzQWzOTRu4Thqh9J4g/exec';
-const MAX_RETRY = 3;
+const MAX_RETRY = 2;
 const RETRY_DELAY_MS = 2000;
 
-// Invia con retry automatico (max 3 tentativi, backoff esponenziale)
+// Invia con retry automatico (max 2 tentativi, backoff esponenziale)
 async function sendWithRetry(url, payload, attempt = 1) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000); // 12s timeout per tentativo
