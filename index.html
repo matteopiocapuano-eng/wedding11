@@ -889,7 +889,7 @@ async function submitForm(e){
   const email         = document.getElementById("f-email").value.trim();
   const tel           = document.getElementById("f-tel").value.trim();
   const ospiti        = document.getElementById("f-ospiti").value.trim();
-  const partecipazione= document.getElementById("f-partecipazione").value;
+  const partecipazione= presenza === 'no' ? '' : document.getElementById("f-partecipazione").value;
   const navetta_n     = ""; // campo rimosso, calcolato lato sheet se necessario
   const note_menu     = document.getElementById("f-note-menu")?.value?.trim() || "";
   const messaggio     = document.getElementById("f-messaggio")?.value.trim() || "";
