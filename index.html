@@ -553,7 +553,14 @@ document.addEventListener('DOMContentLoaded', () => {
     r.addEventListener('change', e => aggiornaSezionPresenza(e.target.value));
   });
 
-  // Listener navetta (nessuna logica di abilitazione necessaria con nuovo layout)
+  // Listener partecipazione — disabilita navetta e menu se solo cerimonia
+  document.getElementById('f-partecipazione').addEventListener('change', e => {
+    const soloCerimonia = e.target.value === 'Solo cerimonia (Manfredonia)';
+    ['card-navetta','card-menu'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('disabled', soloCerimonia);
+    });
+  });
 
   // Stato iniziale: navetta e menu disabilitati finché non si conferma la presenza
   ['card-navetta','card-menu','card-messaggio'].forEach(id => {
