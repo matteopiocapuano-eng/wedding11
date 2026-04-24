@@ -558,8 +558,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const soloCerimonia = e.target.value === 'Solo cerimonia (Manfredonia)';
     ['card-navetta','card-menu'].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.classList.toggle('disabled', soloCerimonia);
+      if (el) {
+        el.classList.toggle('disabled', soloCerimonia);
+        el.style.display = soloCerimonia ? 'none' : '';
+      }
     });
+    // Reset navetta e menu se solo cerimonia
+    if (soloCerimonia) {
+      // Deseleziona tutte le radio navetta
+      document.querySelectorAll('input[type="radio"][name^="eg-navetta"], input[type="radio"][name="navetta"]').forEach(r => r.checked = false);
+      // Deseleziona tutte le checkbox intolleranze
+      document.querySelectorAll('input[type="checkbox"][name^="intol"]').forEach(c => c.checked = false);
+      // Svuota note menu
+      document.querySelectorAll('input[id^="eg-note"], #f-note-menu').forEach(n => n.value = '');
+    } else {
+      ['card-navetta','card-menu'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = '';
+      });
+    }
   });
 
   // Stato iniziale: navetta e menu disabilitati finché non si conferma la presenza
