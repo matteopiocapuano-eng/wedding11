@@ -584,10 +584,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Stato iniziale: navetta e menu disabilitati finché non si conferma la presenza
+  // Stato iniziale: navetta e menu nascosti finché non si conferma la presenza con ricevimento
   ['card-navetta','card-menu'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.classList.add('disabled');
+    if (el) { el.classList.add('disabled'); el.style.display = 'none'; }
   });
   if (rowOspiti) { rowOspiti.style.opacity = '.4'; rowOspiti.style.pointerEvents = 'none'; }
 });
