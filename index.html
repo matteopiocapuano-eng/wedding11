@@ -362,8 +362,8 @@ footer{background:var(--bg3);padding:4rem 2rem;text-align:center;}
             <div class="fg"><label>Cognome *</label><input type="text" id="f-cognome" name="cognome" required placeholder="Il tuo cognome" oninput="aggiornaNomePrincipale()"></div>
           </div>
           <div class="form-row">
-            <div class="fg"><label>Email *</label><input type="email" id="f-email" name="email" required placeholder="email@esempio.it"></div>
-            <div class="fg"><label>Telefono</label><input type="tel" id="f-tel" name="telefono" placeholder="+39 000 000 0000"></div>
+            <div class="fg"><label>Telefono *</label><input type="tel" id="f-tel" name="telefono" required placeholder="+39 000 000 0000"></div>
+            <div class="fg"><label>Email <span style="font-size:.75em;font-weight:400;color:var(--ink3)">(facoltativa)</span></label><input type="email" id="f-email" name="email" placeholder="email@esempio.it"></div>
           </div>
         </div>
 
@@ -611,7 +611,7 @@ const obs=new IntersectionObserver(entries=>entries.forEach(el=>{if(el.isInterse
 document.querySelectorAll(".fu").forEach(el=>obs.observe(el));
 
 // SUBMIT FORM — Google Sheets (versione affidabile con retry)
-const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxVRtoT4CKIGpyk9se5F6-mkhhjvmk5KumeEktfwLxF_EC3-2XjKzQWzOTRu4Thqh9J4g/exec';
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwPbQj1Mhc8G9ZusdeVcQ0g_g_HkcdVvAB55mgTh5vgYFr1BHmI0jgVs2-zQvDx8a2q/exec';
 const MAX_RETRY = 3;
 const RETRY_DELAY_MS = 2000;
 
@@ -815,6 +815,10 @@ function validaForm(presenza, navetta, nome, cognome, ospitiExtra) {
   const elCognome = document.getElementById('f-cognome');
   if (!cognome) { segnalaErrore(elCognome, 'Cognome obbligatorio'); return false; }
 
+  // Telefono obbligatorio
+  const elTel = document.getElementById('f-tel');
+  if (!elTel.value.trim()) { segnalaErrore(elTel, 'Telefono obbligatorio'); return false; }
+
   // Navetta ospite principale (solo se partecipa)
   if (presenza === 'si') {
     const navWrap = document.querySelector('#navetta-persone-wrap .persona-row .radio-g');
@@ -901,8 +905,9 @@ async function submitForm(e){
     function recapPersona(nomeP, navP, intolP, noteP, bambinoP) {
       const navTxt = navP === 'si' ? '🚌 Sì, utilizza la navetta' : navP === 'no' ? 'No, arriva autonomamente' : '—';
       const intolTxt = intolP || 'Nessuna';
+      const tipoTxt = bambinoP === 'si' ? '👶 Bambino/a' : '👤 Adulto';
       return `
-        ${bambinoP === 'si' ? `<div class="recap-row"><strong>Tipo</strong>👶 Bambino/a</div>` : ''}
+        <div class="recap-row"><strong>Tipo</strong>${tipoTxt}</div>
         <div class="recap-row"><strong>Navetta</strong>${navTxt}</div>
         ${intolP ? `<div class="recap-row"><strong>Intolleranze</strong>${intolTxt}</div>` : ''}
         ${noteP ? `<div class="recap-row"><strong>Note menù</strong>${noteP}</div>` : ''}`;
