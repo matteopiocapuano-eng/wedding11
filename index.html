@@ -532,11 +532,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function aggiornaSezionPresenza(val) {
     const disabilitare = val === 'no';
-    ['card-navetta','card-menu','card-messaggio'].forEach(id => {
+    ['card-navetta','card-menu'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
         el.classList.toggle('disabled', disabilitare);
-        if (id !== 'card-messaggio') el.style.display = disabilitare ? 'none' : '';
+        el.style.display = disabilitare ? 'none' : '';
       }
     });
     if (rowOspiti) {
@@ -583,7 +583,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Stato iniziale: navetta e menu disabilitati finché non si conferma la presenza
-  ['card-navetta','card-menu','card-messaggio'].forEach(id => {
+  ['card-navetta','card-menu'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('disabled');
   });
@@ -1040,9 +1040,9 @@ function resetForm(){
   if (noteMenu) noteMenu.value = '';
 
   // Ripristina sezioni disabilitate
-  ['card-navetta','card-menu','card-messaggio'].forEach(id => {
+  ['card-navetta','card-menu'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.classList.add('disabled');
+    if (el) { el.classList.add('disabled'); el.style.display = ''; }
   });
   const rowOspiti = document.querySelector('#f-ospiti')?.closest('.form-row');
   if (rowOspiti) { rowOspiti.style.opacity='.4'; rowOspiti.style.pointerEvents='none'; }
