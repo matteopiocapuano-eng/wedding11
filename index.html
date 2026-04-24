@@ -872,8 +872,11 @@ async function submitForm(e){
   btn.disabled = true;
   loadingWrap.classList.add("show");
 
+  // ID univoco per questo invio (usato da tutti i retry per evitare duplicati)
+  const invioId = crypto.randomUUID();
+
   // Riga principale (ospite 1)
-  const formData = { nome, cognome, email, tel, presenza, ospiti, partecipazione, navetta, navetta_n, intolleranze, note_menu, bambino: 'no', messaggio };
+  const formData = { nome, cognome, email, tel, presenza, ospiti, partecipazione, navetta, navetta_n, intolleranze, note_menu, bambino: 'no', messaggio, invio_id: invioId + '_0' };
 
   try {
     btn.textContent = "Invio in corso…";
@@ -896,7 +899,8 @@ async function submitForm(e){
         intolleranze: ex.intolleranze || '',
         note_menu: ex.note_menu || '',
         bambino: ex.bambino || 'no',
-        messaggio: `Accompagnatore di ${nome} ${cognome}`
+        messaggio: `Accompagnatore di ${nome} ${cognome}`,
+        invio_id: invioId + '_' + (i+1)
       };
       await sendWithRetry(GOOGLE_SHEET_URL, extraData);
     }
