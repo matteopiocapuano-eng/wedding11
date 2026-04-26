@@ -117,7 +117,7 @@ nav.scrolled{box-shadow:0 1px 20px rgba(26,46,90,.10);}
 /* LOCATION */
 #location{background:var(--white);}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:start;}
-.venue-name{font-family:'Pinyon Script',cursive;font-size:2.6rem;font-weight:400;color:var(--ink);margin-bottom:.2rem;}
+.venue-name{font-family:'Pinyon Script',cursive;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:400;color:var(--ink);margin-bottom:.2rem;white-space:nowrap;}
 .venue-tag{font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);margin-bottom:1.4rem;display:block;}
 .venue-desc{font-size:.84rem;line-height:1.9;color:var(--ink2);margin-bottom:1.8rem;}
 .info-list{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.8rem;}
@@ -339,7 +339,7 @@ footer{background:var(--bg3);padding:4rem 2rem;text-align:center;}
     </div>
     <div class="two-col">
       <div class="fu">
-        <h3 class="venue-name">Santissima Trinità</h3>
+        <h3 class="venue-name">Parrocchia Santissima Trinità</h3>
         <span class="venue-tag">Parrocchia · Manfredonia · Arcidiocesi di Manfredonia-Vieste-San Giovanni Rotondo</span>
         <p class="venue-desc">La Parrocchia della Santissima Trinità, eretta canonicamente nel 1997 e completata nel 2007, si affaccia su Via Dante Alighieri nel quartiere Monticchio di Manfredonia. Un luogo di culto luminoso e accogliente che farà da cornice al sacramento del nostro matrimonio.</p>
         <div class="info-list">
@@ -507,7 +507,7 @@ footer{background:var(--bg3);padding:4rem 2rem;text-align:center;}
       <div style="background:var(--bg2);border-top:2px solid var(--accent);padding:2rem 2.5rem;box-shadow:0 4px 30px rgba(26,46,90,.07);">
         <p style="font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--ink3);margin-bottom:1rem;">Coordinate bancarie</p>
         <p style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:300;color:var(--ink);letter-spacing:.06em;margin-bottom:.4rem;">Intestato a</p>
-        <p style="font-family:'Pinyon Script',cursive;font-size:1.8rem;font-weight:400;color:var(--ink);margin-bottom:1.5rem;line-height:1.8;">Matteo Pio Capuano<br>&amp;<br>Daniela Vaira</p>
+        <p style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;color:var(--ink);margin-bottom:1.5rem;line-height:1.9;letter-spacing:.06em;">Matteo Pio Capuano<br>&amp;<br>Daniela Vaira</p>
         <div style="border-top:1px solid var(--border);padding-top:1.5rem;">
           <p style="font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);margin-bottom:.6rem;">IBAN</p>
           <div style="display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;">
@@ -525,7 +525,7 @@ footer{background:var(--bg3);padding:4rem 2rem;text-align:center;}
 
 <!-- FOOTER -->
 <footer>
-  <p class="ft-names">Matteo &amp; Daniela</p>
+  <p class="ft-names">Matteo<span style="font-family:'Cormorant Garamond',serif;font-size:.45em;letter-spacing:.05em;vertical-align:middle;margin:0 .2em;font-style:italic;">·</span>Daniela</p>
   <div class="ft-line"></div>
   <p class="ft-date">11 Agosto 2026 · Puglia, Italia</p>
   <p class="ft-venue">Cerimonia: SS. Trinità, Manfredonia &nbsp;·&nbsp; Ricevimento: Tenuta Montevitolo, Andria</p>
