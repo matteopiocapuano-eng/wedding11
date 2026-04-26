@@ -203,7 +203,7 @@ nav.scrolled{box-shadow:0 1px 20px rgba(26,46,90,.10);}
 .btn-send-wrap{position:relative;}
 .success-box{display:none;background:var(--white);padding:3rem 2.5rem;border-top:2px solid var(--accent);text-align:center;box-shadow:0 4px 30px rgba(26,46,90,.06);}
 .success-box.show{display:block;}
-.success-ico{font-size:2.8rem;margin-bottom:1.2rem;}
+.success-ico{font-size:2.8rem;margin-bottom:1.5rem;display:flex;justify-content:center;}
 .success-t{font-family:'Pinyon Script',cursive;font-size:3.2rem;font-weight:400;color:var(--ink);margin-bottom:.4rem;}
 .success-s{font-size:.82rem;color:var(--ink3);margin-bottom:2rem;line-height:1.8;}
 .recap-wrap{text-align:left;margin-bottom:2rem;}
@@ -479,7 +479,15 @@ footer{background:var(--bg3);padding:4rem 2rem;text-align:center;}
         </div>
       </form>
       <div class="success-box" id="success-box">
-        <div class="success-ico">💌</div>
+        <div class="success-ico">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Fedi nuziali intrecciate -->
+            <circle cx="24" cy="32" r="11" stroke="#1a2e5a" stroke-width="3.5" fill="none"/>
+            <circle cx="40" cy="32" r="11" stroke="#4a6fa5" stroke-width="3.5" fill="none"/>
+            <!-- Brillantino in cima -->
+            <polygon points="32,10 34.5,15 40,15 35.5,18.5 37.5,24 32,20.5 26.5,24 28.5,18.5 24,15 29.5,15" fill="#1a2e5a" opacity="0.85"/>
+          </svg>
+        </div>
         <h3 class="success-t">Grazie mille!</h3>
         <p class="success-s" id="success-msg">La tua risposta è stata registrata con successo.</p>
         <div class="recap-wrap" id="success-detail"></div>
